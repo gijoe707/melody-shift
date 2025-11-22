@@ -39,3 +39,7 @@ npm run dev
 ```
 
 Visit `http://localhost:5173` to start moving your music! 🎧
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
