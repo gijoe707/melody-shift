@@ -1,0 +1,8 @@
+{
+  "access_token": "your_youtube_music_access_token_here",
+  "refresh_token": "your_youtube_music_refresh_token_here",
+  "scope": "https://www.googleapis.com/auth/youtube",
+  "token_type": "Bearer",
+  "expires_in": 3599,
+  "expires_at": 1234567890.123
+}
