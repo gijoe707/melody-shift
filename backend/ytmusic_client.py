@@ -41,12 +41,21 @@ class YouTubeMusicClient:
             print("Initializing YouTube Music client with OAUTH env vars")
             # Build oauth.json from env vars with sensible defaults
             oauth_data = {
-                "user-agent": os.getenv("OAUTH_USER_AGENT", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0"),
-                "accept": "*/*",
-                "accept-language": "en-US,en;q=0.5",
-                "content-type": "application/json",
-                "x-goog-authuser": os.getenv("OAUTH_X_GOOG_AUTHUSER", "1"),
-                "x-origin": "https://music.youtube.com",
+                "user-agent": os.getenv("OAUTH_USER_AGENT"),
+                "accept": os.getenv("OAUTH_ACCEPT"),
+                "accept-language": os.getenv("OAUTH_ACCEPT_LANGUAGE"),
+                "content-type": os.getenv("OAUTH_CONTENT_TYPE"),
+                "referer": os.getenv("OAUTH_REFERER"),
+                "x-goog-visitor-id": os.getenv("OAUTH_X_GOOG_VISITOR_ID"),
+                "x-youtube-bootstrap-logged-in": os.getenv("OAUTH_X_YOUTUBE_BOOTSTRAP_LOGGED_IN"),
+                "x-youtube-client-name": os.getenv("OAUTH_X_YOUTUBE_CLIENT_NAME"),
+                "x-youtube-client-version": os.getenv("OAUTH_X_YOUTUBE_CLIENT_VERSION"),
+                "x-goog-authuser": os.getenv("OAUTH_X_GOOG_AUTHUSER"),
+                "x-origin": os.getenv("OAUTH_X_ORIGIN"),
+                "origin": os.getenv("OAUTH_ORIGIN"),
+                "sec-fetch-dest": os.getenv("OAUTH_SEC_FETCH_DEST"),
+                "sec-fetch-mode": os.getenv("OAUTH_SEC_FETCH_MODE"),
+                "sec-fetch-site": os.getenv("OAUTH_SEC_FETCH_SITE"),
                 "cookie": os.getenv("OAUTH_COOKIE"),
                 "authorization": os.getenv("OAUTH_AUTHORIZATION")
             }

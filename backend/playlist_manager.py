@@ -10,6 +10,12 @@ Commands:
 """
 
 import sys
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
 from datetime import datetime
 from storage import (
     get_all_backend_playlists, 
@@ -309,7 +315,7 @@ def cleanup_account_command():
     print("and allow you to delete them. This includes playlists NOT created by Melody Shift.")
     
     confirm_fetch = input("\nFetch all playlists? (yes/no): ").strip().lower()
-    if confirm_fetch != 'yes':
+    if confirm_fetch not in ['y', 'yes']:
         return
 
     print("\n📥 Fetching playlists from YouTube Music...")
