@@ -193,7 +193,7 @@ const Index = () => {
 
       if (selectedPlaylistId) {
         // Direct link + Public -> Start Transfer immediately
-        handlePlaylistsSelect([selectedPlaylistId], false);
+        handlePlaylistsSelect([selectedPlaylistId], false, {});
       } else {
         // Logged in + Public -> Go to playlist selection
         setCurrentStep(3);
@@ -210,14 +210,14 @@ const Index = () => {
 
     if (selectedPlaylistId) {
       // Direct link + Private Headers -> Start Transfer
-      handlePlaylistsSelect([selectedPlaylistId], false);
+      handlePlaylistsSelect([selectedPlaylistId], false, headers);
     } else {
       // Logged in + Private Headers -> Go to playlist selection
       setCurrentStep(3);
     }
   };
 
-  const handlePlaylistsSelect = async (playlistIds: string[], includeLiked: boolean) => {
+  const handlePlaylistsSelect = async (playlistIds: string[], includeLiked: boolean, explicitHeaders?: YouTubeMusicHeaders) => {
     const sessionId = localStorage.getItem("spotify_session_id") || "guest_session";
 
     // Calculate grand total tracks
@@ -244,7 +244,7 @@ const Index = () => {
             playlistIds,
             includeLiked,
             grandTotalTracks: grandTotal,
-            ytHeaders: ytHeaders || {}, // Pass empty if public
+            ytHeaders: explicitHeaders || ytHeaders || {}, // Pass explicit if provided, else state, else empty
           }),
         }
       );
