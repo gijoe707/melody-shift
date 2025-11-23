@@ -44,20 +44,21 @@ The robust Python backend for Melody Shift, handling playlist transfers, backgro
    SPOTIFY_REDIRECT_URI=http://localhost:5173/callback
    ```
 
-4. **(Optional)** Setup YouTube Music OAuth:
+4. **(Optional)** Setup YouTube Music Authentication for Public Playlists:
    
-   For authenticated YouTube Music transfers (creating private playlists), you need `oauth.json`:
+   For server-side public playlist creation, set these environment variables from YouTube Music browser headers:
    
-   ```bash
-   python setup_ytmusic.py
-   ```
+   **How to get the values:**
+   1. Open YouTube Music (music.youtube.com) in your browser
+   2. Press F12 → Network tab
+   3. Filter by "browse"
+   4. Click any request and find "Request Headers"
+   5. Copy `cookie` value → Set as `OAUTH_COOKIE` in `.env`
+   6. Copy `authorization` value → Set as `OAUTH_AUTHORIZATION` in `.env`
    
-   This will:
-   - Open a browser to authenticate with YouTube Music
-   - Generate `oauth.json` with your credentials
-   - Enable public playlist creation
-   
-   **Note:** Without `oauth.json`, the app still works but user needs to provide their own headers for authentication, we cannot generate public playlist without `oauth.json`.
+   **Important:** 
+   - The Google account must have a YouTube channel
+   - When cookies expire, just copy new values from Network tab
 
 ### Running the Server
 
@@ -99,8 +100,7 @@ python playlist_manager.py cleanup-account
 
 ## 📁 Important Files
 
-- `oauth.json` - YouTube Music OAuth credentials (auto-generated, gitignored)
-- `.env` - Spotify API credentials (copy from `.env.example`, gitignored)
+- `.env` - Configuration with Spotify credentials and YouTube OAuth env vars (gitignored)
 - `logger.py` - Clean timestamped logging system
 - `playlist_manager.py` - CLI management tool
 - `transfer_worker.py` - Core playlist transfer logic

@@ -209,6 +209,11 @@ def validate_and_extract_playlist_id(response):
             for action in response['actions']:
                 if 'channelCreationFormEndpoint' in action:
                     raise Exception("YouTube Channel not found. Please create a channel on music.youtube.com first.")
+                # Check for feature enablement popup (e.g. Terms of Service or other blockers)
+                if 'showEngagementPanelEndpoint' in action:
+                    panel = action['showEngagementPanelEndpoint']
+                    tag = panel.get('identifier', {}).get('tag', 'unknown')
+                    raise Exception(f"YouTube Music returned a feature enablement popup (tag: {tag}). This usually means the account needs to accept terms or has a channel issue. Please check music.youtube.com in a browser.")
         
         # Try to extract ID if possible
         if 'id' in response:
@@ -216,7 +221,8 @@ def validate_and_extract_playlist_id(response):
         elif 'playlistId' in response:
             return response['playlistId']
         else:
-            raise Exception(f"Failed to create playlist. Please ensure you have a YouTube channel created. Response: {response}")
+            # Generic failure if no ID found
+            raise Exception(f"Failed to create playlist. No playlist ID returned. Response: {response}")
             
     return response
 

@@ -6,8 +6,8 @@ import os
 class YouTubeMusicClient:
     """Wrapper for YouTube Music operations"""
     
-    def __init__(self, oauth_file="oauth.json", headers_json=None):
-        """Initialize YouTube Music client with OAuth or Headers"""
+    def __init__(self, headers_json=None):
+        """Initialize YouTube Music client with Headers or OAuth env vars"""
         import json
         import tempfile
         import time
@@ -35,15 +35,38 @@ class YouTubeMusicClient:
             self.yt = YTMusic(auth=tf.name)
             # Store the temp file path so we can clean it up later if needed
             self._temp_file = tf.name
-        elif os.path.exists(oauth_file):
-            print(f"Initializing YouTube Music client with OAUTH FILE: {oauth_file}")
-            # Fallback to OAuth file
-            self.yt = YTMusic(oauth_file)
-            self._temp_file = None
+            
+        # Check for OAuth env vars (Server Public Account)
+        elif os.getenv("OAUTH_COOKIE") and os.getenv("OAUTH_AUTHORIZATION"):
+            print("Initializing YouTube Music client with OAUTH env vars")
+            # Build oauth.json from env vars with sensible defaults
+            oauth_data = {
+                "user-agent": os.getenv("OAUTH_USER_AGENT", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0"),
+                "accept": "*/*",
+                "accept-language": "en-US,en;q=0.5",
+                "content-type": "application/json",
+                "x-goog-authuser": os.getenv("OAUTH_X_GOOG_AUTHUSER", "1"),
+                "x-origin": "https://music.youtube.com",
+                "cookie": os.getenv("OAUTH_COOKIE"),
+                "authorization": os.getenv("OAUTH_AUTHORIZATION")
+            }
+            
+            # Write to temp file for ytmusicapi
+            tf = tempfile.NamedTemporaryFile(
+                mode='w+', 
+                delete=False, 
+                suffix='.json',
+                prefix='ytmusic_oauth_'
+            )
+            json.dump(oauth_data, tf)
+            tf.close()
+            self.yt = YTMusic(auth=tf.name)
+            self._temp_file = tf.name
         else:
-            raise FileNotFoundError(
-                f"YouTube Music OAuth file '{oauth_file}' not found and no headers provided. "
-                "Run setup first: YTMusic.setup(filepath='oauth.json')"
+            raise ValueError(
+                "No valid authentication found. Either:\n"
+                "1. Provide headers_json parameter for private playlists, OR\n"
+                "2. Set OAUTH_COOKIE and OAUTH_AUTHORIZATION env vars for public playlists"
             )
     
     def create_playlist(self, title: str, description: str = "", privacy_status: str = "PRIVATE"):
