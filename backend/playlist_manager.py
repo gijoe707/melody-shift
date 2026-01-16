@@ -176,7 +176,7 @@ def cancel_deletion():
         print(f"❌ Error: {e}")
 
 def cleanup_old():
-    """Manually trigger cleanup of playlists older than 25 minutes"""
+    """Manually trigger cleanup of playlists older than 30 minutes"""
     playlists = get_all_backend_playlists()
     if not playlists:
         print("\n❌ No playlists to cleanup.")
@@ -189,11 +189,11 @@ def cleanup_old():
         created = datetime.fromisoformat(info['created_at'])
         age_minutes = (now - created).total_seconds() / 60
         
-        if age_minutes > 25:
+        if age_minutes > 30:
             old_playlists.append((playlist_id, age_minutes))
     
     if not old_playlists:
-        print("\n✅ No playlists older than 25 minutes found.")
+        print("\n✅ No playlists older than 30 minutes found.")
         return
     
     print(f"\n🧹 Found {len(old_playlists)} old playlist(s):")
@@ -321,16 +321,49 @@ def cleanup_account_command():
     print("\n📥 Fetching playlists from YouTube Music...")
     try:
         yt = YouTubeMusicClient()
-        playlists = yt.get_library_playlists(limit=None)
+        all_playlists = yt.get_library_playlists(limit=None)
     except Exception as e:
         print(f"❌ Failed to fetch playlists: {e}")
         return
     
-    if not playlists:
+    if not all_playlists:
         print("✅ No playlists found on this account.")
         return
+    
+    # Filter out system playlists that cannot be deleted
+    # System playlists have special IDs like "LM" (Liked Music), "SE" (Episodes), etc.
+    # User-created playlists have IDs starting with "PL" or "VL"
+    system_playlist_ids = ['LM', 'SE', 'RDTMAK', 'RDCLAK']  # Known system playlist prefixes
+    
+    playlists = []
+    skipped_system = []
+    
+    for p in all_playlists:
+        pid = p.get('playlistId', '')
+        # Skip if it's a known system playlist or doesn't start with PL/VL
+        is_system = (
+            pid in system_playlist_ids or 
+            any(pid.startswith(prefix) for prefix in system_playlist_ids) or
+            (not pid.startswith('PL') and not pid.startswith('VL') and len(pid) < 10)
+        )
         
-    print(f"\nFound {len(playlists)} playlists:")
+        if is_system:
+            skipped_system.append(p)
+        else:
+            playlists.append(p)
+    
+    if skipped_system:
+        print(f"\n⚠️  Skipping {len(skipped_system)} system playlist(s) that cannot be deleted:")
+        for p in skipped_system:
+            title = p.get('title', 'Unknown')
+            pid = p.get('playlistId', 'Unknown')
+            print(f"   - {title} (ID: {pid})")
+    
+    if not playlists:
+        print("\n✅ No user-created playlists to delete.")
+        return
+        
+    print(f"\n\nFound {len(playlists)} user-created playlists:")
     for i, p in enumerate(playlists, 1):
         title = p.get('title', 'Unknown')
         count = p.get('trackCount', p.get('count', '?'))
@@ -348,22 +381,35 @@ def cleanup_account_command():
         
     print("\n🗑️  Deleting ALL playlists...")
     deleted_count = 0
+    failed_count = 0
+    
     for p in playlists:
         pid = p.get('playlistId')
         title = p.get('title', 'Unknown')
         
         if not pid:
             print(f"   ⚠️  Skipping playlist '{title}' (No ID found)")
+            failed_count += 1
             continue
             
         try:
             yt.delete_playlist(pid)
             print(f"   ✅ Deleted '{title}'")
             deleted_count += 1
+        except KeyboardInterrupt:
+            print(f"\n\n⚠️  Operation interrupted by user!")
+            print(f"Deleted {deleted_count} playlists before interruption.")
+            return
         except Exception as e:
             print(f"   ❌ Failed to delete '{title}': {e}")
+            failed_count += 1
+            # Continue with next playlist instead of crashing
+            continue
             
-    print(f"\n✅ Cleanup complete. Deleted {deleted_count} playlists.")
+    print(f"\n✅ Cleanup complete!")
+    print(f"   Deleted: {deleted_count} playlists")
+    if failed_count > 0:
+        print(f"   Failed: {failed_count} playlists")
 
 def show_help():
     """Display help information"""

@@ -238,8 +238,20 @@ async def get_routes():
 @app.on_event("startup")
 async def startup_event():
     print("Server starting up...")
+    
+    # Start the background scheduler for playlist auto-deletion
+    if not storage.scheduler.running:
+        storage.scheduler.start()
+        print("✅ Background scheduler started for playlist auto-deletion")
+    
     for route in app.routes:
         print(f"Route: {route.path} [{route.methods}]")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    print("Server shutting down...")
+    storage.shutdown()
+    print("✅ Background scheduler stopped")
 
 if __name__ == "__main__":
     import uvicorn
