@@ -6,6 +6,7 @@ import { DestinationChoice } from "@/components/DestinationChoice";
 import { PlaylistSelector } from "@/components/PlaylistSelector";
 import { TransferProgress } from "@/components/TransferProgress";
 import { TransferResults } from "@/components/TransferResults";
+import { ServerStatus } from "@/components/ServerStatus";
 import { Music2, Github } from "lucide-react";
 import { SpotifyPlaylist, YouTubeMusicHeaders } from "@/types/api";
 
@@ -305,18 +306,21 @@ const Index = () => {
                 </p>
               </div>
             </div>
-            {spotifyConnected && (
-              <button
-                onClick={() => {
-                  localStorage.removeItem("spotify_session_id");
-                  setSpotifyConnected(false);
-                  handleReset();
-                }}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Sign Out
-              </button>
-            )}
+            <div className="flex items-center gap-4">
+              <ServerStatus />
+              {spotifyConnected && (
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("spotify_session_id");
+                    setSpotifyConnected(false);
+                    handleReset();
+                  }}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Sign Out
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
