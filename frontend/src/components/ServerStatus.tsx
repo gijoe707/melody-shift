@@ -11,7 +11,7 @@ export const ServerStatus = () => {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/`, {
+            const response = await fetch(`${"${import.meta.env.VITE_API_URL}/"}`, {
                 signal: controller.signal,
             });
 
@@ -52,7 +52,9 @@ export const ServerStatus = () => {
                     } ${isChecking ? "animate-pulse" : ""}`}
             />
             <span className={isOnline ? "text-green-500" : "text-red-500"}>
-                {isOnline ? "Server is online" : "Server is offline"}
+                {isOnline
+                    ? "Server is online"
+                    : "Temporarily closed due to Spotify API limits on my (owner) free account — not your fault, it’s my fault. I need Spotify Premium to re-open access."}
             </span>
         </div>
     );
